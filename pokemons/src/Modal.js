@@ -1,15 +1,13 @@
 import React from 'react'
 import "./Result.css"
-function Modal({ selectedPokemon, closeModal }) {
+function Modal({ selectedPokemon, closeModal, imageUrl }) {
     return (
       <div className="modal">
         <div className="modal-content">
         <button className="close-btn" onClick={closeModal}>X</button>
           <h2>{selectedPokemon.name.english}</h2>
           <img
-                src={`https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/${selectedPokemon.id
-                  .toString()
-                  .padStart(3, '0')}.png`}
+                src={imageUrl}
                 alt={selectedPokemon.name.english}
               />
                 <table>

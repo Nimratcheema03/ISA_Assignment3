@@ -9,10 +9,13 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const endIndex = startIndex + PAGE_SIZE;
   const [selectedPokemon, setSelectedPokemon] = useState(null);
+  const [selectedImageUrl, setSelectedImageUrl] = useState(null);
   const [imageUrls, setImageUrls] = useState({});
 
-  const handleCardClick = (pokemon) => {
+  const handleCardClick = async(pokemon) => {
     setSelectedPokemon(pokemon);
+    await getImageUrl(pokemon.id);
+    setSelectedImageUrl(imageUrls[pokemon.id]);
   };
 
   const closeModal = () => {
@@ -24,7 +27,7 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
   axiosJWT.interceptors.request.use(
     async (config) => {
       const decodedToken = jwt_decode(accessToken);
-      if (decodedToken.exp < Date.now() / 1000) {
+      if (decodedToken.exp < Date.now() / 800) {
         const res = await axios.get("http://localhost:6001/requestNewAccessToken", {
           headers: {
             'auth-token-refresh': refreshToken
@@ -98,8 +101,9 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
     </div>
     {/* Display modal if a pokemon is selected */}
     {selectedPokemon && (
-        <Modal selectedPokemon={selectedPokemon} closeModal={closeModal} />
-      )}
+  <Modal selectedPokemon={selectedPokemon} closeModal={closeModal} imageUrl={selectedImageUrl} />
+)}
+
     <div> <Pagination pokemons={filteredPokemons} PAGE_SIZE={PAGE_SIZE} setCurrentPage={setCurrentPage} currentPage={currentPage} /></div>
     </div>
   );
