@@ -27,6 +27,17 @@ const schema = new mongoose.Schema({
     trim: true,
     min: 3
   },
+  refreshToken: {
+    type: String,
+    required: false,
+    trim: true,
+    default: null
+  },
+  token_invalid: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
   role: {
     type: String,
     required: true,

@@ -3,7 +3,7 @@ import React from 'react'
 import {useState } from "react";
 import Filter from './Filter';
 import Results from './Result';
-function Pokemons() {
+function Pokemons({accessToken, setAccessToken, refreshToken}) {
   const [types, setTypes] = useState([]);
   const [name, setName] = useState('');
   const [pokemons, setPokemons] = useState([])
@@ -19,7 +19,7 @@ function Pokemons() {
       >
       </Filter>
       <Results types={types} name ={name} pokemons={pokemons} setPokemons={setPokemons} PAGE_SIZE = {PAGE_SIZE}
-    currentPage = {currentPage} setCurrentPage={setCurrentPage}></Results>
+    currentPage = {currentPage} setCurrentPage={setCurrentPage} accessToken={accessToken} setAccessToken={setAccessToken} refreshToken={refreshToken}></Results>
    </div>
   )
 }

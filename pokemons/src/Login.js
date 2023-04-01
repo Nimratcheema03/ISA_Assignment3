@@ -17,8 +17,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const res = await axios.post("http://localhost:6001/login", { username, password });
-    console.log(res.data)
-    setUser(res.data);
+    setUser(res.data.update);
+    console.log("login",res.data.update)
     setAccessToken(res.headers['auth-token-access']);
     setRefreshToken(res.headers['auth-token-refresh']);
   }
@@ -32,7 +32,7 @@ const Login = () => {
            <Dashboard accessToken={accessToken} setAccessToken={setAccessToken} refreshToken={refreshToken} />
         }
         {(user.role =="user") &&
-           <Pokemons/>
+           <Pokemons accessToken={accessToken} setAccessToken={setAccessToken} refreshToken={refreshToken}/>
         }
         </div>
       }

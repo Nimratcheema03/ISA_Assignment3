@@ -32,11 +32,11 @@ function Modal({ selectedPokemon, closeModal }) {
               </tr>
               <tr>
                 <td>Sp. Attack</td>
-                <td>{selectedPokemon.base['Sp. Attack']}</td>
+                <td>{selectedPokemon.base['Speed Attack']}</td>
               </tr>
               <tr>
                 <td>Sp. Defense</td>
-                <td>{selectedPokemon.base['Sp. Defense']}</td>
+                <td>{selectedPokemon.base['Speed Defense']}</td>
               </tr>
               <tr>
                 <td>Speed</td>
