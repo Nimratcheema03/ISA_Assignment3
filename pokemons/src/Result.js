@@ -55,10 +55,12 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
         }
       });
       const pokemonArray = Object.values(res.data);
+      pokemonArray.sort((a, b) => a.id - b.id);
       setPokemons(pokemonArray);
     }
     fetchTypes();
   }, []);
+  
   const filteredPokemons = pokemons?.filter(
     (pokemon) => types?.every((type) => pokemon.type?.includes(type)) && pokemon?.name?.english.toLowerCase().includes(name?.toLowerCase())
   );

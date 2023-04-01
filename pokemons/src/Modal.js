@@ -12,6 +12,10 @@ function Modal({ selectedPokemon, closeModal, imageUrl }) {
               />
                 <table>
             <tbody>
+            <tr>
+                <td>ID</td>
+                <td>{selectedPokemon.id}</td>
+              </tr>
               <tr>
                 <td>Type</td>
                 <td>{selectedPokemon.type.join(', ')}</td>
