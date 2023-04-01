@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import axios from 'axios';
+import "./filter.css"
 function Filter({types, setTypes, name, setName}) {
     const [alltypes, setAllTypes] = useState([])
 

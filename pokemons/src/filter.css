@@ -1,0 +1,76 @@
+/* Style for the input field */
+.name {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  /* Style for the checkboxes */
+  #heading {
+ display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  }
+  
+  input[type="checkbox"] {
+    display: inline-block;
+  vertical-align: middle;
+  margin-left: 55px;
+  margin-top: -30px;
+  height: 20px;
+  }
+  
+  /* Style for the container */
+.filter{
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: 10px;
+  }
+  .filter2{
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #d4eff5;
+    margin-left: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .filter1{
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #d4eff5;
+    width: 500px;
+    margin-left: 50px;
+  }
+  
+  .label1{
+    width: 100%;
+    margin-left: 30px;
+    margin-top: 10px;
+    font-size: 20px;
+    font-weight: bolder;
+  }
+  #label3{
+    font-size: 30px;
+    font-weight: 700;
+    color:  #043056e3;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .label{
+    font-size: 30px;
+    font-weight: 700;
+    color:  #043056e3;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }

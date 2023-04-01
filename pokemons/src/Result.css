@@ -1,0 +1,143 @@
+.result-container {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
+    grid-auto-rows: 2fr;
+    grid-gap: 1rem;
+    margin: 1rem;
+  }
+  
+  .pokemon-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+  }
+  
+  .pokemon-card img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  .pokemon-name {
+    font-weight: bold;
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+  
+  .modal {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 50%;
+    height: 80%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 25%;
+    margin-top: 2%;
+  }
+  
+  .modal-content {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  }
+  
+  .modal-content h2 {
+    margin-top: 0;
+    text-align: center;
+  }
+  
+  .modal-content img {
+    max-width: 50%;
+    border: 1px solid #cccccc00;
+    border-radius: 5px;
+    margin: 20px auto;
+    display: block;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  th {
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background-color: transparent;
+    font-size: 1.5rem;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  
+  .close-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #333;
+    border: none;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .close-btn:hover {
+    background-color: #555;
+  }
+  
+  .close-btn:focus {
+    outline: none;
+  }
+  
+  .close-btn:before,
+  .close-btn:after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 18px;
+    background-color: #fff;
+  }
+  
+  .close-btn:before {
+    transform: rotate(45deg);
+  }
+  
+  .close-btn:after {
+    transform: rotate(-45deg);
+  }
+  
