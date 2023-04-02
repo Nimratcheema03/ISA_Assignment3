@@ -73,3 +73,28 @@
     margin-top: 50px;
     margin-bottom: 30px;
   }
+  #button1 {
+    background-color:  #043056e3;;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    position: absolute;
+    top: 50px;
+    right: 50px;
+  }
+  .welcome-message {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+    margin-top: 50px;
+    text-shadow: 2px 2px #eee;
+  }
+  
+  .username {
+    color: #1a73e8;
+    text-shadow: 2px 2px #ccc;
+    text-transform: uppercase;
+  }

@@ -125,7 +125,7 @@ app.get('/requestNewAccessToken', async (req, res) => {
   }
   try {
     const payload = await jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
-    const accessToken = jwt.sign({ user: payload.user }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' })
+    const accessToken = jwt.sign({ user: payload.user }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' })
     res.header('auth-token-access', accessToken)
     res.status(200).send("All good!");
   }catch (error) {
@@ -170,7 +170,7 @@ app.post('/login',async (req, res) => {
   }
 
 
-  const accessToken = jwt.sign({ user: user }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' })
+  const accessToken = jwt.sign({ user: user }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' })
   if (!user.refreshToken) {
       const refreshToken = jwt.sign({ user: user }, process.env.REFRESH_TOKEN_SECRET)
       const update = await userModel.findOneAndUpdate({ username }, { "token_invalid": false, "refreshToken": refreshToken }, { new: true })
@@ -206,9 +206,7 @@ app.get('/logout', async (req, res) => {
       message: error.message
     });
   }
-  user.refreshToken = null;
-  user.token_invalid = true;
-  await user.save();
+  await userModel.findOneAndUpdate({ refreshToken}, { "token_invalid": true, "refreshToken": null }, { new: true })
   res.json({user:user, msg: 'Logged out' });
 })
 

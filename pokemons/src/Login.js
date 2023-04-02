@@ -42,12 +42,20 @@ const Login = () => {
     localStorage.setItem('accessToken', res.headers['auth-token-access']);
     localStorage.setItem('refreshToken', res.headers['auth-token-refresh']);
   }
-
+  const handleLogout = async() => {
+    setUser(null);
+    setAccessToken('');
+    setRefreshToken('');
+    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+  };
   return (
     <div>
       {(user) && 
         <div>
-            <h1>Welcome {user.username}</h1>
+            <h1 className="welcome-message">Welcome, <span className="username">{user.username}</span>!</h1>
+            <button id="button1" onClick={handleLogout}>Logout</button>
           {(user.role =="admin") &&
            <Dashboard accessToken={accessToken} setAccessToken={setAccessToken} refreshToken={refreshToken} />
         }

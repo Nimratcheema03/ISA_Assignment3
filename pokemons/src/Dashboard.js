@@ -9,7 +9,7 @@ function Dashboard({accessToken, setAccessToken, refreshToken}) {
   axiosJWT.interceptors.request.use(
     async (config) => {
       const decodedToken = jwt_decode(accessToken);
-      if (decodedToken.exp < Date.now() / 800) {
+      if (decodedToken.exp < Date.now() / 1000) {
         const res = await axios.get("http://localhost:6001/requestNewAccessToken", {
           headers: {
             'auth-token-refresh': refreshToken
