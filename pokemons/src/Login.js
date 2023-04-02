@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState} from 'react'
+import { useState, useEffect} from 'react'
 import axios from 'axios'
 import {Link } from "react-router-dom";
 import "./Form.css"
@@ -13,14 +13,34 @@ const Login = () => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState('');
   const [refreshToken, setRefreshToken] = useState('');
-
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem("user");
+    const storedAccessToken = localStorage.getItem("accessToken");
+    const storedRefreshToken = localStorage.getItem("refreshToken");
+  
+    if (loggedInUser) {
+      const foundUser = JSON.parse(loggedInUser);
+      setUser(foundUser);
+    }
+  
+    if (storedAccessToken) {
+      setAccessToken(storedAccessToken);
+    }
+  
+    if (storedRefreshToken) {
+      setRefreshToken(storedRefreshToken);
+    }
+  }, []);
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const res = await axios.post("http://localhost:6001/login", { username, password });
     setUser(res.data.update);
-    console.log("login",res.data.update)
     setAccessToken(res.headers['auth-token-access']);
     setRefreshToken(res.headers['auth-token-refresh']);
+    localStorage.setItem('user', JSON.stringify(res.data.update));
+    localStorage.setItem('accessToken', res.headers['auth-token-access']);
+    localStorage.setItem('refreshToken', res.headers['auth-token-refresh']);
   }
 
   return (

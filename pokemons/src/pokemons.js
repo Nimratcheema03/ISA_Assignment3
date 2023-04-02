@@ -4,6 +4,7 @@ import {useState } from "react";
 import Filter from './Filter';
 import Results from './Result';
 function Pokemons({accessToken, setAccessToken, refreshToken}) {
+  console.log("pokemons executed")
   const [types, setTypes] = useState([]);
   const [name, setName] = useState('');
   const [pokemons, setPokemons] = useState([])
