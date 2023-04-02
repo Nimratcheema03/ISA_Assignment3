@@ -49,6 +49,7 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
 
   useEffect(() => {
     async function fetchTypes() {
+      console.log("getting pokemons")
       const res = await axiosJWT.get('http://localhost:6001/api/v1/allpokemons', {
         headers: {
           'auth-token-access': accessToken

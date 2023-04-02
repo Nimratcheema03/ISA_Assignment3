@@ -14,21 +14,38 @@ const Login = () => {
   const [accessToken, setAccessToken] = useState('');
   const [refreshToken, setRefreshToken] = useState('');
   useEffect(() => {
+    console.log(" admin login executed")
     const loggedInUser = localStorage.getItem("user");
+   
     const storedAccessToken = localStorage.getItem("accessToken");
+
     const storedRefreshToken = localStorage.getItem("refreshToken");
-  
-    if (loggedInUser) {
+   
+    if (loggedInUser ) {
       const foundUser = JSON.parse(loggedInUser);
       setUser(foundUser);
     }
-  
-    if (storedAccessToken) {
+    if (storedAccessToken ) {
       setAccessToken(storedAccessToken);
     }
-  
     if (storedRefreshToken) {
       setRefreshToken(storedRefreshToken);
+    }
+  }, []);
+  useEffect(() => {
+    console.log(" user login executed")
+    const loggedInUser1 = sessionStorage.getItem("user");
+    const storedAccessToken1 = sessionStorage.getItem("accessToken");
+    const storedRefreshToken1 = sessionStorage.getItem("refreshToken");
+    if ( loggedInUser1) {
+      const foundUser = JSON.parse(loggedInUser1);
+      setUser(foundUser);
+    }
+    if ( storedAccessToken1) {
+      setAccessToken(storedAccessToken1);
+    }
+    if (storedRefreshToken1) {
+      setRefreshToken(storedRefreshToken1);
     }
   }, []);
   
@@ -38,17 +55,32 @@ const Login = () => {
     setUser(res.data.update);
     setAccessToken(res.headers['auth-token-access']);
     setRefreshToken(res.headers['auth-token-refresh']);
+    if(res.data.update.role === "admin"){
     localStorage.setItem('user', JSON.stringify(res.data.update));
     localStorage.setItem('accessToken', res.headers['auth-token-access']);
     localStorage.setItem('refreshToken', res.headers['auth-token-refresh']);
+    }else{
+      sessionStorage.setItem('user', JSON.stringify(res.data.update));
+      sessionStorage.setItem('accessToken', res.headers['auth-token-access']);
+      sessionStorage.setItem('refreshToken', res.headers['auth-token-refresh']);
+    }
   }
   const handleLogout = async() => {
+    if(user.role === "admin"){
     setUser(null);
     setAccessToken('');
     setRefreshToken('');
     localStorage.removeItem('user');
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    }else{
+    setUser(null);
+    setAccessToken('');
+    setRefreshToken('');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('accessToken')
+    sessionStorage.removeItem('refreshToken')
+    }
   };
   return (
     <div>
