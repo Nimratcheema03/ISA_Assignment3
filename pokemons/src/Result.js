@@ -27,7 +27,7 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
     async (config) => {
       const decodedToken = jwt_decode(accessToken);
       if (decodedToken.exp < Date.now() / 1000) {
-        const res = await axios.get("http://localhost:6001/requestNewAccessToken", {
+        const res = await axios.get("https://pokedex-7dyg.onrender.com/requestNewAccessToken", {
           headers: {
             'auth-token-refresh': refreshToken
           }
@@ -48,7 +48,7 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
 
   useEffect(() => {
     async function fetchTypes() {
-      const res = await axiosJWT.get('http://localhost:6001/api/v1/allpokemons', {
+      const res = await axiosJWT.get('https://pokedex-7dyg.onrender.com/api/v1/allpokemons', {
         headers: {
           'auth-token-access': accessToken
         }
@@ -66,7 +66,7 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
   const currentPokemons = filteredPokemons?.slice(startIndex, endIndex);
   const getImageUrl = async (id) => {
     if (!imageUrls[id]) {
-      const response = await axiosJWT.get(`http://localhost:6001/pokemonImage/${id}`, {
+      const response = await axiosJWT.get(`https://pokedex-7dyg.onrender.com/pokemonImage/${id}`, {
         headers: {
           'auth-token-access': accessToken
         }

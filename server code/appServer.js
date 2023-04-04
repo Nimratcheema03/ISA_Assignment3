@@ -265,7 +265,7 @@ const authAdmin = async (req, res, next) => {
 
 app.use(authUser)
 const apiReportMiddleware = require('./apiMiddleware.js')
-app.get('/api/v1/pokemons', async (req, res) => {
+app.get('/api/v1/pokemons',  apiReportMiddleware, async (req, res) => {
   try{
   if (!req.query["count"])
     req.query["count"] = 10

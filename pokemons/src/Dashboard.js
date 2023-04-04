@@ -21,7 +21,7 @@ function Dashboard({accessToken, setAccessToken, refreshToken}) {
     async (config) => {
       const decodedToken = jwt_decode(accessToken);
       if (decodedToken.exp < Date.now() / 1000) {
-        const res = await axios.get("http://localhost:6001/requestNewAccessToken", {
+        const res = await axios.get("https://pokedex-7dyg.onrender.com/requestNewAccessToken", {
           headers: {
             'auth-token-refresh': refreshToken
           }
@@ -39,7 +39,7 @@ function Dashboard({accessToken, setAccessToken, refreshToken}) {
   useEffect(() => {
     async function fetchReportsData() {
       console.log("hello")
-        const uniqueUsersRes = await axiosJWT.get('http://localhost:6001/unique-users-over-time', {
+        const uniqueUsersRes = await axiosJWT.get('https://pokedex-7dyg.onrender.com/unique-users-over-time', {
           headers: {
             'auth-token-access': accessToken
           },
@@ -47,28 +47,28 @@ function Dashboard({accessToken, setAccessToken, refreshToken}) {
        
         setUniqueUsersData(uniqueUsersRes.data);
 
-        const topUsersRes = await axiosJWT.get('http://localhost:6001/top-users-over-time', {
+        const topUsersRes = await axiosJWT.get('https://pokedex-7dyg.onrender.com/top-users-over-time', {
           headers: {
             'auth-token-access': accessToken
           },
         });
         setTopUsersData(topUsersRes.data);
 
-        const topEndpointUsersRes = await axiosJWT.get('http://localhost:6001/top-users-by-endpoint', {
+        const topEndpointUsersRes = await axiosJWT.get('https://pokedex-7dyg.onrender.com/top-users-by-endpoint', {
           headers: {
             'auth-token-access': accessToken
           },
         });
         setTopEndpointUsersData(topEndpointUsersRes.data);
 
-        const errorsByEndpointRes = await axiosJWT.get('http://localhost:6001/4xx-errors-by-endpoint', {
+        const errorsByEndpointRes = await axiosJWT.get('https://pokedex-7dyg.onrender.com/4xx-errors-by-endpoint', {
           headers: {
             'auth-token-access': accessToken
           },
         });
         setErrorsByEndpointData(errorsByEndpointRes.data);
 
-        const recentErrorsRes = await axiosJWT.get('http://localhost:6001/4xx-5xx-errors', {
+        const recentErrorsRes = await axiosJWT.get('https://pokedex-7dyg.onrender.com/4xx-5xx-errors', {
           headers: {
             'auth-token-access': accessToken
           },

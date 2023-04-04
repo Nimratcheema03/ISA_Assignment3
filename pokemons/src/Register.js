@@ -11,7 +11,7 @@ const [user, setUser] = useState(null);
 const navigate = useNavigate();
 const handleSubmit = async (e) => {
   e.preventDefault();
-  const res = await axios.post("http://localhost:6001/register", { username, password, email});
+  const res = await axios.post("https://pokedex-7dyg.onrender.com/register", { username, password, email});
   console.log(res.data)
   setUser(res.data);
 }

@@ -51,7 +51,7 @@ const Login = () => {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await axios.post("http://localhost:6001/login", { username, password });
+    const res = await axios.post("https://pokedex-7dyg.onrender.com/login", { username, password });
     console.log(res.data)
     setUser(res.data.update);
     setAccessToken(res.headers['auth-token-access']);
