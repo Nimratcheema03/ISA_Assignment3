@@ -5,7 +5,7 @@ const apiReportMiddleware = (req, res, next) => {
   next();
 
   // Use res.on('finish') to record the response data after it has been sent
-  res.on('finish', () => {
+  res.on('finish', async () => {
     const logEntry = new ApiReport({
       username: req.user.username,
       timestamp: new Date(),
@@ -14,13 +14,12 @@ const apiReportMiddleware = (req, res, next) => {
       status_code: res.statusCode
     });
 
-    logEntry.save((err, entry) => {
-      if (err) {
-        console.error('Error saving API log entry:', err);
-      } else {
-        console.log('API log entry saved:', entry);
-      }
-    });
+    try {
+      const entry = await logEntry.save();
+      console.log('API log entry saved:', entry);
+    } catch (err) {
+      console.error('Error saving API log entry:', err);
+    }
   });
 };
 

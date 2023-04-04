@@ -210,6 +210,7 @@ app.get('/logout', async (req, res) => {
 
 const authUser = async (req, res, next) => {
   const token = req.header('auth-token-access')
+  console.log(token)
 
   if (!token) {
     const error = new PokemonAuthError("No Token: Please provide the access token using the headers");
@@ -226,7 +227,8 @@ const authUser = async (req, res, next) => {
     };
     const userid =  decodedToken.user._id
     console.log(userid)
-    const userWithToken = await userModel.findOne({ userid});
+    const userWithToken = await userModel.findOne({_id: userid});
+    console.log(userWithToken)
     if (!userWithToken || userWithToken.token_invalid) {
       const error = new PokemonAuthError("Please Login.");
       return res.status(error.pokeErrCode).json({
@@ -421,208 +423,214 @@ app.patch('/api/v1/pokemon/:id', async (req, res) => {
 
 const ApiReport = require('./apiReport');
 
-app.get('/top-users-by-endpoint', (req, res) => {
-  ApiReport.aggregate([
-    {
-      $match: {
-        status_code: { $ne: 404 }
-      }
-    },
-    {
-      $group: {
-        _id: {
-          endpoint: {
-            $cond: [
-              { $regexMatch: { input: '$endpoint', regex: /\/pokemonImage\// } },
-              { $substr: ['$endpoint', 0, 14] },
-              '$endpoint'
-            ]
+app.get('/top-users-by-endpoint', async (req, res) => {
+  try {
+    const result = await ApiReport.aggregate([
+      {
+        $match: {
+          status_code: { $ne: 404 }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            endpoint: {
+              $cond: [
+                { $regexMatch: { input: '$endpoint', regex: /\/pokemonImage\// } },
+                { $substr: ['$endpoint', 0, 14] },
+                '$endpoint'
+              ]
+            },
+            username: '$username'
           },
-          username: '$username'
-        },
-        requests: { $sum: 1 }
+          requests: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id.endpoint': 1, requests: -1 }
+      },
+      {
+        $group: {
+          _id: '$_id.endpoint',
+          topUsers: { $push: { username: '$_id.username', requests: '$requests' } }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          endpoint: '$_id',
+          topUsers: { $slice: ['$topUsers', 10] }
+        }
       }
-    },
-    {
-      $sort: { '_id.endpoint': 1, requests: -1 }
-    },
-    {
-      $group: {
-        _id: '$_id.endpoint',
-        topUsers: { $push: { username: '$_id.username', requests: '$requests' } }
-      }
-    },
-    {
-      $project: {
-        _id: 0,
-        endpoint: '$_id',
-        topUsers: { $slice: ['$topUsers', 10] }
-      }
-    }
-  ], (err, result) => {
-    if (err) {
-      console.error('Error generating top users for each endpoint report:', err);
-      res.status(500).send('Error generating report');
-    } else {
-      console.log('Top users for each endpoint report:', result);
-      res.json(result);
-    }
-  });
+    ]);
+    console.log('Top users for each endpoint report:', result);
+    res.json(result);
+  } catch (err) {
+    console.error('Error generating top users for each endpoint report:', err);
+    res.status(500).send('Error generating report');
+  }
 });
 
 
-app.get('/unique-users-over-time', (req, res) => {
+
+app.get('/unique-users-over-time', async (req, res) => {
   const endDate = new Date().toLocaleString;
   const startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); // last day
 
-  ApiReport.aggregate([
-    {
-      $match: {
-        timestamp: { $gte: startDate, $lte: endDate },
+  try {
+    const result = await ApiReport.aggregate([
+      {
+        $match: {
+          timestamp: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $addFields: {
+          minute: {
+            $dateToString: {
+              format: '%Y-%m-%d %H',
+              date: '$timestamp',
+              timezone: 'America/Vancouver',
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$minute',
+          uniqueUsers: { $addToSet: '$username' },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+      {
+        $project: {
+          _id: 0,
+          date: '$_id',
+          uniqueUsersCount: { $size: '$uniqueUsers' },
+        },
+      },
+    ]);
 
-      }
-    },
-    {
-      $addFields: {
-        minute: { $dateToString: { format: '%Y-%m-%d %H', date: '$timestamp',timezone: 'America/Vancouver' } }
-      }
-    },
-    {
-      $group: {
-        _id: '$minute',
-        uniqueUsers: { $addToSet: '$username' }
-      }
-    },
-    {
-      $sort: { _id: 1 }
-    },
-    {
-      $project: {
-        _id: 0,
-        date: '$_id',
-        uniqueUsersCount: { $size: '$uniqueUsers' }
-      }
-    }
-  ], (err, result) => {
-    if (err) {
-      console.error('Error generating unique API users over time report:', err);
-      res.status(500).send('Error generating report');
-    } else {
-      console.log('Unique API users over time report:', result);
-      res.json(result);
-    }
-  });
+    console.log('Unique API users over time report:', result);
+    res.json(result);
+  } catch (err) {
+    console.error('Error generating unique API users over time report:', err);
+    res.status(500).send('Error generating report');
+  }
 });
 
-app.get('/top-users-over-time', (req, res) => {
+
+app.get('/top-users-over-time', async (req, res) => {
   const endDate = new Date();
-  const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000); // last days
-  console.log(endDate)
+  const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000); // last day
 
-  ApiReport.aggregate([
-    {
-      $match: {
-        timestamp: { $gte: startDate, $lte: endDate }
+  try {
+    const result = await ApiReport.aggregate([
+      {
+        $match: {
+          timestamp: { $gte: startDate, $lte: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: { username: '$username' },
+          requests: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { requests: -1 }
+      },
+      {
+        $limit: 10
+      },
+      {
+        $project: {
+          _id: 0,
+          username: '$_id.username',
+          requests: 1
+        }
       }
-    },
-    {
-      $group: {
-        _id: { username: '$username' },
-        requests: { $sum: 1 }
-      }
-    },
-    {
-      $sort: { requests: -1 }
-    },
-    {
-      $limit: 10
-    },
-    {
-      $project: {
-        _id: 0,
-        username: '$_id.username',
-        requests: 1
-      }
-    }
-  ], (err, result) => {
-    if (err) {
-      console.error('Error generating top API users over time report:', err);
-      res.status(500).send('Error generating report');
-    } else {
-      console.log('Top API users over time report:', result);
-      res.json(result);
-    }
-  });
+    ]);
+
+    console.log('Top API users over time report:', result);
+    res.json(result);
+  } catch (err) {
+    console.error('Error generating top API users over time report:', err);
+    res.status(500).send('Error generating report');
+  }
 });
-app.get('/4xx-errors-by-endpoint', (req, res) => {
-  ApiReport.aggregate([
-    {
-      $match: {
-        status_code: { $gte: 400 }
+
+app.get('/4xx-errors-by-endpoint', async (req, res) => {
+  try {
+    const result = await ApiReport.aggregate([
+      {
+        $match: {
+          status_code: { $gte: 400 }
+        }
+      },
+      {
+        $group: {
+          _id: { endpoint: '$endpoint', status_code: '$status_code' },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      },
+      {
+        $project: {
+          _id: 0,
+          endpoint: '$_id.endpoint',
+          status_code: '$_id.status_code',
+          count: 1
+        }
       }
-    },
-    {
-      $group: {
-        _id: { endpoint: '$endpoint', status_code: '$status_code' },
-        count: { $sum: 1 }
-      }
-    },
-    {
-      $sort: { count: -1 }
-    },
-    {
-      $project: {
-        _id: 0,
-        endpoint: '$_id.endpoint',
-        status_code: '$_id.status_code',
-        count: 1
-      }
-    }
-  ], (err, result) => {
-    if (err) {
-      console.error('Error generating 4xx/5xx errors by endpoint report:', err);
-      res.status(500).send('Error generating report');
-    } else {
-      console.log('4xx/5xx errors by endpoint report:', result);
-      res.json(result);
-    }
-  });
+    ]);
+    console.log('4xx/5xx errors by endpoint report:', result);
+    res.json(result);
+  } catch (err) {
+    console.error('Error generating 4xx/5xx errors by endpoint report:', err);
+    res.status(500).send('Error generating report');
+  }
 });
-app.get('/4xx-5xx-errors', (req, res) => {
+
+app.get('/4xx-5xx-errors', async (req, res) => {
   const endDate = new Date();
   const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
 
-  ApiReport.aggregate([
-    {
-      $match: {
-        timestamp: { $gte: startDate, $lte: endDate },
-        status_code: { $gte: 400 }
+  try {
+    const result = await ApiReport.aggregate([
+      {
+        $match: {
+          timestamp: { $gte: startDate, $lte: endDate },
+          status_code: { $gte: 400 }
+        }
+      },
+      {
+        $group: {
+          _id: { endpoint: '$endpoint', status_code: '$status_code' },
+          failed_requests: { $push: { timestamp: '$timestamp', request: '$$ROOT' } }
+        }
+      },
+      {
+        $sort: { '_id.endpoint': 1 }
+      },
+      {
+        $project: {
+          _id: 0,
+          endpoint: '$_id.endpoint',
+          status_code: '$_id.status_code',
+          failed_requests: 1
+        }
       }
-    },
-    {
-      $group: {
-        _id: { endpoint: '$endpoint', status_code: '$status_code' },
-        failed_requests: { $push: { timestamp: '$timestamp', request: '$$ROOT' } }
-      }
-    },
-    {
-      $sort: { '_id.endpoint': 1 }
-    },
-    {
-      $project: {
-        _id: 0,
-        endpoint: '$_id.endpoint',
-        status_code: '$_id.status_code',
-        failed_requests: 1
-      }
-    }
-  ], (err, result) => {
-    if (err) {
-      console.error('Error generating 4xx/5xx errors by endpoint report:', err);
-      res.status(500).send('Error generating report');
-    } else {
-      console.log('4xx/5xx errors by endpoint report:', result);
-      res.json(result);
-    }
-  });
+    ]);
+
+    console.log('4xx/5xx errors by endpoint report:', result);
+    res.json(result);
+  } catch (err) {
+    console.error('Error generating 4xx/5xx errors by endpoint report:', err);
+    res.status(500).send('Error generating report');
+  }
 });
