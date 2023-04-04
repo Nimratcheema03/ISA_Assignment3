@@ -33,14 +33,14 @@ const start = async () => {
   const pokeSchema = await getTypes();
   pokeModel = mongoose.model('pokemons', pokeSchema);
   app.listen(process.env.authServerPORT, async(err) => {
-    if (err)
-      throw new PokemonDbError(err)
-    else
-      console.log(`Phew! Server is running on port: ${process.env.pokeServerPORT}`);
-      const doc = await userModel.findOne({ "username": "admin" })
-      if (!doc)
-        userModel.create({ username: "admin", password: bcrypt.hashSync("admin", 10), role: "admin", email: "admin@admin.ca" })
-  })
+  //   if (err)
+  //     throw new PokemonDbError(err)
+  //   else
+  //     // console.log(`Phew! Server is running on port: ${process.env.pokeServerPORT}`);
+  //     // const doc = await userModel.findOne({ "username": "admin" })
+  //     // if (!doc)
+  //     //   userModel.create({ username: "admin", password: bcrypt.hashSync("admin", 10), role: "admin", email: "admin@admin.ca" })
+ })
 }
 start()
 app.use(express.json())
@@ -227,16 +227,16 @@ const authUser = async (req, res, next) => {
     };
     const userid =  decodedToken.user._id
     console.log(userid)
-    // const userWithToken = await userModel.findOne({_id: userid});
-    // console.log(userWithToken)
-    // if (!userWithToken || userWithToken.token_invalid) {
-    //   const error = new PokemonAuthError("Please Login.");
-    //   return res.status(error.pokeErrCode).json({
-    //     name: error.name,
-    //     code: error.pokeErrCode,
-    //     message: error.message
-    //   });
-    // }
+    const userWithToken = await userModel.findOne({_id: userid});
+    console.log(userWithToken)
+    if (!userWithToken || userWithToken.token_invalid) {
+      const error = new PokemonAuthError("Please Login.");
+      return res.status(error.pokeErrCode).json({
+        name: error.name,
+        code: error.pokeErrCode,
+        message: error.message
+      });
+    }
     next()
   } catch (err) {
     const error = new PokemonAuthError("Invalid Token Verification. Log in again.");
