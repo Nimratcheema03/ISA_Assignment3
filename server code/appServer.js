@@ -2,7 +2,6 @@ const mongoose = require("mongoose")
 const express = require("express")
 const { connectDB } = require("./connectDB.js")
 const { getTypes } = require("./getTypes.js")
-const morgan = require("morgan")
 const cors = require("cors")
 const dotenv = require("dotenv")
 dotenv.config();
@@ -45,7 +44,6 @@ const start = async () => {
 }
 start()
 app.use(express.json())
-app.use(morgan(":method"))
 
 app.use(cors({
   exposedHeaders: ['auth-token-access', 'auth-token-refresh']
