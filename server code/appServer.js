@@ -10,7 +10,7 @@ const userModel = require("./userModel.js")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 require('express-async-errors');
-const {populatePokemons} = require('./populatePokemons.js');
+// const {populatePokemons} = require('./populatePokemons.js');
 const {
   PokemonBadRequest,
   PokemonBadRequestMissingID,
@@ -32,7 +32,7 @@ var pokeModel = null;
 const start = async () => {
   await connectDB({ "drop": false });
   const pokeSchema = await getTypes();
-  pokeModel = await populatePokemons(pokeSchema)
+  pokeModel = mongoose.model('pokemons', pokeSchema);
   app.listen(process.env.authServerPORT, async(err) => {
     if (err)
       throw new PokemonDbError(err)
