@@ -46,7 +46,8 @@ start()
 app.use(express.json())
 
 app.use(cors({
-  exposedHeaders: ['auth-token-access', 'auth-token-refresh']
+  exposedHeaders: ['auth-token-access', 'auth-token-refresh'],
+  'Access-Control-Allow-Origin': '*' 
 }))
 
 app.post('/register', async (req, res) => {
