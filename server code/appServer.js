@@ -170,7 +170,7 @@ app.post('/login',async (req, res) => {
   }
 
 
-  const accessToken = jwt.sign({ user: user }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' })
+  const accessToken = jwt.sign({ user: user }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10m' })
   if (!user.refreshToken) {
       const refreshToken = jwt.sign({ user: user }, process.env.REFRESH_TOKEN_SECRET)
       const update = await userModel.findOneAndUpdate({ username }, { "token_invalid": false, "refreshToken": refreshToken }, { new: true })
@@ -224,7 +224,7 @@ const authUser = async (req, res, next) => {
   try {
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
     req.user = {
-      uniqueUserId: decodedToken.user._id
+      username: decodedToken.user.username
     };
     const userid =  decodedToken.user._id
     console.log(userid)
@@ -263,8 +263,9 @@ const authAdmin = async (req, res, next) => {
 }
 
 app.use(authUser)
-
+const apiReportMiddleware = require('./apiMiddleware.js')
 app.get('/api/v1/pokemons', async (req, res) => {
+  try{
   if (!req.query["count"])
     req.query["count"] = 10
   if (!req.query["after"])
@@ -274,10 +275,13 @@ app.get('/api/v1/pokemons', async (req, res) => {
     .skip(req.query["after"])
     .limit(req.query["count"])
   res.json({docs})
+  }catch(err){
+    res.status(400).json(err)
+  }
 
 })
 
-app.get('/api/v1/allpokemons', async (req, res) => {
+app.get('/api/v1/allpokemons',apiReportMiddleware, async (req, res) => {
   const pokemons = await pokeModel.find().lean();
   if (pokemons.length !== 0) {
     res.status(200).json(pokemons);
@@ -287,9 +291,10 @@ app.get('/api/v1/allpokemons', async (req, res) => {
 });
 
 
-app.get('/api/v1/pokemon', async (req, res) => {
-  const {id }= req.query.id
+app.get('/api/v1/pokemonss',apiReportMiddleware, async (req, res) => {
+  const id = req.query.id
         const pokemon = await pokeModel.find({"id": id})
+        console.log(pokemon)
         if(pokemon.length != 0){
             res.send(pokemon)
         }
@@ -302,17 +307,22 @@ app.get('/api/v1/pokemon', async (req, res) => {
     }
 })
 
-app.get('/pokemonImage/:id', async(req, res)=>{
+app.get('/pokemonImage/:id', apiReportMiddleware, async(req, res)=>{
   let id = req.params.id
+  console.log("id", id)
   try{
       const pokemon = await pokeModel.findOne({"id": id})
       if(pokemon){
           let desiredLength = 3;
           let paddedNumber = id.toString().padStart(desiredLength, '0');
           const response  = `https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/${paddedNumber}.png`
-          res.json(response)
+          if(response){
+          res.status(200).json(response)
+          }else{
+             res.json(404).json('no imagee')
+          }
       }else{
-          res.json({
+          res.status(404).json({
               msg : "Pokemon not found"
           })
       }
@@ -411,9 +421,210 @@ app.patch('/api/v1/pokemon/:id', async (req, res) => {
   }
 })
 
+const ApiReport = require('./apiReport');
 
-app.get('/report', (req, res) => {
-  console.log("Report requested");
-  res.send(`Table ${req.query.id}`)
-})
+app.get('/top-users-by-endpoint', (req, res) => {
+  ApiReport.aggregate([
+    {
+      $match: {
+        status_code: { $ne: 404 }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          endpoint: {
+            $cond: [
+              { $regexMatch: { input: '$endpoint', regex: /\/pokemonImage\// } },
+              { $substr: ['$endpoint', 0, 14] },
+              '$endpoint'
+            ]
+          },
+          username: '$username'
+        },
+        requests: { $sum: 1 }
+      }
+    },
+    {
+      $sort: { '_id.endpoint': 1, requests: -1 }
+    },
+    {
+      $group: {
+        _id: '$_id.endpoint',
+        topUsers: { $push: { username: '$_id.username', requests: '$requests' } }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        endpoint: '$_id',
+        topUsers: { $slice: ['$topUsers', 10] }
+      }
+    }
+  ], (err, result) => {
+    if (err) {
+      console.error('Error generating top users for each endpoint report:', err);
+      res.status(500).send('Error generating report');
+    } else {
+      console.log('Top users for each endpoint report:', result);
+      res.json(result);
+    }
+  });
+});
 
+
+app.get('/unique-users-over-time', (req, res) => {
+  const endDate = new Date().toLocaleString;
+  const startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); // last day
+
+  ApiReport.aggregate([
+    {
+      $match: {
+        timestamp: { $gte: startDate, $lte: endDate },
+
+      }
+    },
+    {
+      $addFields: {
+        minute: { $dateToString: { format: '%Y-%m-%d %H', date: '$timestamp',timezone: 'America/Vancouver' } }
+      }
+    },
+    {
+      $group: {
+        _id: '$minute',
+        uniqueUsers: { $addToSet: '$username' }
+      }
+    },
+    {
+      $sort: { _id: 1 }
+    },
+    {
+      $project: {
+        _id: 0,
+        date: '$_id',
+        uniqueUsersCount: { $size: '$uniqueUsers' }
+      }
+    }
+  ], (err, result) => {
+    if (err) {
+      console.error('Error generating unique API users over time report:', err);
+      res.status(500).send('Error generating report');
+    } else {
+      console.log('Unique API users over time report:', result);
+      res.json(result);
+    }
+  });
+});
+
+app.get('/top-users-over-time', (req, res) => {
+  const endDate = new Date();
+  const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000); // last days
+  console.log(endDate)
+
+  ApiReport.aggregate([
+    {
+      $match: {
+        timestamp: { $gte: startDate, $lte: endDate }
+      }
+    },
+    {
+      $group: {
+        _id: { username: '$username' },
+        requests: { $sum: 1 }
+      }
+    },
+    {
+      $sort: { requests: -1 }
+    },
+    {
+      $limit: 10
+    },
+    {
+      $project: {
+        _id: 0,
+        username: '$_id.username',
+        requests: 1
+      }
+    }
+  ], (err, result) => {
+    if (err) {
+      console.error('Error generating top API users over time report:', err);
+      res.status(500).send('Error generating report');
+    } else {
+      console.log('Top API users over time report:', result);
+      res.json(result);
+    }
+  });
+});
+app.get('/4xx-errors-by-endpoint', (req, res) => {
+  ApiReport.aggregate([
+    {
+      $match: {
+        status_code: { $gte: 400 }
+      }
+    },
+    {
+      $group: {
+        _id: { endpoint: '$endpoint', status_code: '$status_code' },
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $sort: { count: -1 }
+    },
+    {
+      $project: {
+        _id: 0,
+        endpoint: '$_id.endpoint',
+        status_code: '$_id.status_code',
+        count: 1
+      }
+    }
+  ], (err, result) => {
+    if (err) {
+      console.error('Error generating 4xx/5xx errors by endpoint report:', err);
+      res.status(500).send('Error generating report');
+    } else {
+      console.log('4xx/5xx errors by endpoint report:', result);
+      res.json(result);
+    }
+  });
+});
+app.get('/4xx-5xx-errors', (req, res) => {
+  const endDate = new Date();
+  const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
+
+  ApiReport.aggregate([
+    {
+      $match: {
+        timestamp: { $gte: startDate, $lte: endDate },
+        status_code: { $gte: 400 }
+      }
+    },
+    {
+      $group: {
+        _id: { endpoint: '$endpoint', status_code: '$status_code' },
+        failed_requests: { $push: { timestamp: '$timestamp', request: '$$ROOT' } }
+      }
+    },
+    {
+      $sort: { '_id.endpoint': 1 }
+    },
+    {
+      $project: {
+        _id: 0,
+        endpoint: '$_id.endpoint',
+        status_code: '$_id.status_code',
+        failed_requests: 1
+      }
+    }
+  ], (err, result) => {
+    if (err) {
+      console.error('Error generating 4xx/5xx errors by endpoint report:', err);
+      res.status(500).send('Error generating report');
+    } else {
+      console.log('4xx/5xx errors by endpoint report:', result);
+      res.json(result);
+    }
+  });
+});

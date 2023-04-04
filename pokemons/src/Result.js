@@ -14,7 +14,6 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
 
   const handleCardClick = async(pokemon) => {
     setSelectedPokemon(pokemon);
-    await getImageUrl(pokemon.id);
     setSelectedImageUrl(imageUrls[pokemon.id]);
   };
 
@@ -49,7 +48,6 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
 
   useEffect(() => {
     async function fetchTypes() {
-      console.log("getting pokemons")
       const res = await axiosJWT.get('http://localhost:6001/api/v1/allpokemons', {
         headers: {
           'auth-token-access': accessToken
@@ -91,12 +89,12 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
       {currentPokemons?.map((pokemon) => {
         return (
           <div key={pokemon.id} className="pokemon-card" onClick={() => handleCardClick(pokemon)}>
-            {imageUrls[pokemon.id] && (
+            
                 <img
                   src={imageUrls[pokemon.id]}
                   alt={pokemon.name.english}
                 />
-              )}
+           
             <div className="pokemon-name">{pokemon.name.english}</div>
           </div>
         );
