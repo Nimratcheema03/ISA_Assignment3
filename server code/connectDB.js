@@ -5,7 +5,7 @@ dotenv.config();
 
 const connectDB = async (input) => {
   try {
-    const x = await mongoose.connect(process.env.DB_STRING)
+    await mongoose.connect("mongodb+srv://nimratpreet:<password>@cluster0.wlaz9kx.mongodb.net/?retryWrites=true&w=majority")
     console.log("Connected to db");
     if (input.drop === true)
       mongoose.connection.db.dropDatabase();
