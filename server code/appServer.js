@@ -169,7 +169,7 @@ app.post('/login',async (req, res) => {
   }
 
 
-  const accessToken = jwt.sign({ user: user }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10m' })
+  const accessToken = jwt.sign({ user: user }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' })
   if (!user.refreshToken) {
       const refreshToken = jwt.sign({ user: user }, process.env.REFRESH_TOKEN_SECRET)
       const update = await userModel.findOneAndUpdate({ username }, { "token_invalid": false, "refreshToken": refreshToken }, { new: true })
