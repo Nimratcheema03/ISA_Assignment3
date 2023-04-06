@@ -26,7 +26,7 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
   axiosJWT.interceptors.request.use(
     async (config) => {
       const decodedToken = jwt_decode(accessToken);
-      if (decodedToken.exp < Date.now() / 1000) {
+      if (decodedToken.exp - Date.now() / 1000 < 30) {
         const res = await axios.get("https://pokedex-7dyg.onrender.com/requestNewAccessToken", {
           headers: {
             'auth-token-refresh': refreshToken
@@ -41,7 +41,26 @@ function Result({ types, name, pokemons, setPokemons, PAGE_SIZE, currentPage, se
       return Promise.reject(error);
     }
   );
-
+  axiosJWT.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    async (error) => {
+      const originalRequest = error.config;
+      if (error?.response.status === 401 && !originalRequest?._retry) {
+        originalRequest._retry = true;
+        const res = await axios.get("https://pokedex-7dyg.onrender.com/requestNewAccessToken", {
+          headers: {
+            'auth-token-refresh': refreshToken
+          }
+        });
+        setAccessToken(res.headers['auth-token-access'])
+        originalRequest.headers["auth-token-access"] = res.headers['auth-token-access'];
+        return axiosJWT(originalRequest);
+      }
+      return Promise.reject(error);
+    }
+  );
   useEffect(() => {
     setCurrentPage(1);
   }, [name, types]);
